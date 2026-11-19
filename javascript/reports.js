@@ -6,7 +6,7 @@ function lowStockProducts(products, threshold = 5) {
 }
 
 function productsSortedByPrice(products) {
-  products.sort((a, b) => a.stock - b.stock);
+  products.sort((a, b) => a.price - b.price);
   return products;
 }
 
