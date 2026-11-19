@@ -1,5 +1,6 @@
 function isNonEmptyString(value) {
-  return typeof value === "string" && value.length > 0;
+  // trims before checking length so whitespace-only strings considered empty
+  return typeof value === "string" && value.trim().length > 0;
 }
 
 function findProductById(products, productId) {
@@ -13,7 +14,8 @@ function findCustomerById(customers, customerId) {
 function validateOrder(order, products, customers) {
   const errors = [];
 
-  if (!order.id) {
+  // applies blank-string check to order IDs as well
+  if (!order.id || (typeof order.id === "string" && !isNonEmptyString(order.id))) {
     errors.push("Order is missing an id");
   }
 
@@ -26,25 +28,38 @@ function validateOrder(order, products, customers) {
     errors.push("Customer does not exist");
   }
 
-  if (!order.items || order.items.length === 0) {
+  // rejects missing / empty / non-array lists
+  if (!Array.isArray(order.items) || order.items.length === 0) {
     errors.push("Order must contain at least one item");
+    return errors;
   }
 
-  for (const item of order.items || []) {
-    const product = findProductById(products, item.productId);
+  const requestedQuantities = new Map();
+  for (const item of order.items) {
+    // reports missing product when item is null / undefined
+    const productId = item?.productId;
+    const product = findProductById(products, productId);
 
     if (!product) {
-      errors.push(`Product does not exist: ${item.productId}`);
+      errors.push(`Product does not exist: ${productId}`);
       continue;
     }
 
-    if (typeof item.quantity !== "number") {
+    // requires positive integer before checking stock
+    const quantity = item.quantity;
+    if (!Number.isInteger(quantity)) {
       errors.push(`Invalid quantity for ${product.name}`);
-    } else if (item.quantity < 0) {
+      continue;
+    }
+    if (quantity <= 0) {
       errors.push(`Quantity must be positive for ${product.name}`);
+      continue;
     }
 
-    if (item.quantity && product.stock < 1) {
+    // adds quantities across repeated product lines
+    const requestedQuantity = (requestedQuantities.get(productId) ?? 0) + quantity;
+    requestedQuantities.set(productId, requestedQuantity);
+    if (requestedQuantity > product.stock) {
       errors.push(`Not enough inventory for ${product.name}`);
     }
   }
