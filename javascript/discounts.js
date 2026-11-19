@@ -14,7 +14,7 @@ function couponDiscountAmount(couponCode, subtotal) {
   }
 
   if (code === "FIVEOFF") {
-    return subtotal * 0.05;
+    return 5;
   }
 
   return 0;
