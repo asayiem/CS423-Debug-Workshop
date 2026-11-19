@@ -1,12 +1,12 @@
 function findProductByName(products, name) {
-  return products.find(product => product.name.toLowerCase() === name);
+  return products.find(product => product.name.toLowerCase() === name.trim().toLowerCase());
 }
 function lowStockProducts(products, threshold = 5) {
   return products.filter(product => product.stock < threshold);
 }
 
 function productsSortedByPrice(products) {
-  products.sort((a, b) => a.stock - b.stock);
+  products.sort((a, b) => a.price - b.price);
   return products;
 }
 
