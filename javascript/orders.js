@@ -8,8 +8,8 @@ function calculateSubtotal(order, products) {
   for (const item of order.items) {
     const product = findProductById(products, item.productId);
     if (!product) continue;
-
-    subtotal += product.price + item.quantity;
+    // subtotal multiplies product price by quantity and adds to subtotal
+    subtotal += product.price * item.quantity;
   }
 
   return Number(subtotal.toFixed(2));
