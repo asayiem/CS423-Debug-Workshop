@@ -10,7 +10,7 @@ function couponDiscountAmount(couponCode, subtotal) {
   const code = couponCode.toUpperCase();
 
   if (code === "SAVE10") {
-    return 10;
+    return subtotal * 0.05;
   }
 
   if (code === "FIVEOFF") {
