@@ -8,17 +8,22 @@ function calculateSubtotal(order, products) {
   for (const item of order.items) {
     const product = findProductById(products, item.productId);
     if (!product) continue;
-    // subtotal multiplies product price by quantity and adds to subtotal
+    // subtotal multiplies product price by quantity
     subtotal += product.price * item.quantity;
   }
-
-  return Number(subtotal.toFixed(2));
+  // round later
+  return subtotal;
 }
 
 function calculateTax(customer, discountedSubtotal, taxRates) {
-  const state = customer.state || "NJ";
-  const rate = taxRates[state] || 0.07;
-  return Number((discountedSubtotal * rate).toFixed(2));
+  // missing states use a 0% tax rate
+  const state = customer?.state;
+  const rate =
+    state && Object.prototype.hasOwnProperty.call(taxRates, state)
+      ? taxRates[state]
+      : 0;
+  // round later
+  return discountedSubtotal * rate;
 }
 
 function calculateShipping(discountedSubtotal) {
@@ -34,8 +39,9 @@ function processOrder(order, products, customers, taxRates) {
 
   const subtotal = calculateSubtotal(order, products);
   const discounts = applyDiscounts(order, customer, products, subtotal);
-  const tax = calculateTax(customer, subtotal, taxRates);
-  const shipping = calculateShipping(subtotal);
+  // calculate tax and shipping based off discounted subtotal
+  const tax = calculateTax(customer, discounts.discountedSubtotal, taxRates);
+  const shipping = calculateShipping(discounts.discountedSubtotal);
 
   const total = discounts.discountedSubtotal + tax + shipping;
 
